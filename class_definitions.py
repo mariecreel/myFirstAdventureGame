@@ -10,6 +10,7 @@ for a programmer and where the hurdles might be for novice programmers.
 this file contains all class definitions.
 """
 import re
+from random import randint
 
 class GameObject:
     """GameObject: all other classes are descendants of this"""
@@ -29,15 +30,63 @@ class Actor(GameObject):
                      "e":"east",
                      "w":"west"}
     vowels = "aeiouAEIOU"
-    def __init__(self, species="Cat", class="House Cat", size = "Small", isPC = False):
+
+    def __init__(self, defense = 10):
         self.inventory = {}
         self.location = None
-        self.attributes = {"Species":species,
-                           "Class":class,
-                           "Size":size}
-        self.isPC = isPC
+        self.hp = 10
+        self.maxHP = 10
+        self.isDead = False
+        self.attributes = {"STR":0,
+                           "CON":0,
+                           "DEX":0,
+                           "INT":0,
+                           "WIN":0,
+                           "CHA":0}
+        self.defense = defense
+
+    def attack(self, target):
+        attackRoll = randint(1, 21)
+        if self.weapon == None:
+            if attackRoll + self.attributes["STR"] > target.defense:
+                target.hp = target.hp - self.attributes["STR"]
+                if target.hp > 0:
+                    print(f"{self.name}'s attack hits!")
+                    print(f"{target.name} takes {self.attributes["STR"]} damage.")
+                else:
+                    target.isDead = True
+                    print(f"{self.name}'s attack hits!")
+                    print(f"{target.name} collapses.")
+            else:
+                print(f"{self.name}'s attack misses!")
+        elif self.weapon != None:
+            if attackRoll + self.attributes["DEX"] > target.defense:
+                target.hp = target.hp - self.weapon.damage
+                if target.hp > 0:
+                    print("{self.name} lands a blow with {self.weapon.name}!")
+                    print("{target.name} takes {self.weapon.damage} damage!")
+                else:
+                    target.isDead = True
+                    print("{self.name} lands a blow with {self.weapon.name}!")
+                    print(f"{target.name} collapses.")
+            else:
+                print(f"{self.name}'s attack misses!")
+
     def attributesRoll(self):
-        
+        """
+        Actor.attributesRoll: rolls a 6 sided die four times, takes the 3 most
+        maximum values of those and returns the sum of those 3 values.
+        meant to emulate attribute rolls in DND character creation.
+        """
+        rolls = []
+        total = 0
+        for key in self.attributes:
+            for i in range(0, 4):
+                rolls.append(randint(1,6))
+            for i in range(0,3):
+                total += rolls.pop(max(rolls))
+            self.attributes[key] = total
+            rolls = []
 
     def useItem(self, item_name):
         if item_name in self.inventory:
